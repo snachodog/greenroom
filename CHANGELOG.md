@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/snachodog/greenroom/compare/v1.5.0...v1.6.0) (2026-10-05)
+
+
+### Features
+
+* **settings:** add option to end the session when the tab is closed ([aadbf19](https://github.com/snachodog/greenroom/commit/aadbf19635563bf4f1cce2a8b9277eb81f1637fe))
+
 # [1.5.0](https://github.com/snachodog/greenroom/compare/v1.4.0...v1.5.0) (2026-10-05)
 
 
