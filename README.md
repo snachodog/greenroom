@@ -23,12 +23,7 @@ Talking to an empty chat is hard to practice. Greenroom gives you a realistic au
 - Each reminder has Done and Snooze. Every reminder and its outcome is logged.
 
 ### A useful look back
-- A report after each session: duration, messages by kind, how many questions you answered, reminders done against reminders fired, and dead-air moments.
-
-### Listening to you
-- Planned: capture your microphone and transcribe it locally with whisper.cpp.
-- Planned: comments that refer to what you just said, and a nudge with a talking point after a long silence.
-- The app works fully without speech input.
+- A report after each session: duration, messages by kind, how many questions you answered, and reminders done against reminders fired.
 
 ## Safety rules
 - No writes to any streaming platform.
@@ -42,7 +37,6 @@ Talking to an empty chat is hard to practice. Greenroom gives you a realistic au
 |-------|-------|-------|
 | 1 | Sessions, personas, engine, LLM batching, dedupe, live chat, acknowledgements | Done |
 | 2 | Reminders, settings, report, auth, Docker, full setup guide | Planned |
-| 3 | Microphone capture, transcripts, dead-air nudges | Planned |
 
 ## Stack
 
@@ -72,7 +66,7 @@ The app does not read `.env` by itself. Export the values, or start it with `npx
 
 ## Out of scope
 
-Multi-user use, reading real platform chat, a mobile app, and analytics beyond the report.
+Multi-user use, reading real platform chat, speech capture or transcription, a mobile app, and analytics beyond the report.
 
 ## Contributing
 
