@@ -18,4 +18,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
     labels: [dependencies, docker]
