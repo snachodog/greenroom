@@ -47,7 +47,7 @@ async function init() {
       chat.prepend(el);
       if (chat.scrollTop > 0) chat.scrollTop += chat.scrollHeight - before;
     }
-    el.className = `msg ${msg.kind}${msg.acknowledged_at ? ' acked' : ''}`;
+    el.className = `msg ${msg.kind}${msg.id % 2 ? ' alt' : ''}${msg.acknowledged_at ? ' acked' : ''}`;
     el.style.setProperty('--c', msg.persona_color);
     const badge = Object.assign(document.createElement('span'), { className: 'sim', textContent: 'SIM' });
     const name = Object.assign(document.createElement('span'), { className: 'name', textContent: msg.persona_name });
