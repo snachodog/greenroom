@@ -1,4 +1,4 @@
-# Greenroom: simulated practice chat for streamers
+# Greenroom: simulated chat audience for streamers
 
 ## Purpose
 Self-hosted web app. Streamer-only dashboard (second monitor) showing an AI-simulated chat audience, promo reminders, and post-stream stats. Simulated messages must never reach viewers.
