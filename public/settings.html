@@ -30,6 +30,10 @@
       ],
       reminders: [['label', 'text'], ['text', 'text'], ['interval_min', 'number'], ['enabled', 'checkbox']],
     };
+    const HEADINGS = {
+      personas: ['Name', 'Color', 'Style', 'Interests', 'Verbosity', 'Skeptical', 'Active'],
+      reminders: ['Label', 'Text', 'Interval (min)', 'Enabled'],
+    };
     const BLANK = {
       personas: { name: '', color: '#4cc9f0', style: '', interests: '', verbosity: 'medium', skeptical: 0, active: 1 },
       reminders: { label: '', text: '', interval_min: 30, enabled: 1 },
@@ -60,7 +64,7 @@
       if (type === 'checkbox') {
         input.checked = !!item[name];
         const label = document.createElement('label');
-        label.append(input, name);
+        label.append(input, Object.assign(document.createElement('span'), { className: 'cb-text', textContent: name }));
         return label;
       }
       input.value = item[name];
@@ -79,10 +83,12 @@
 
     function build(kind, item, isNew) {
       const row = document.createElement('form');
-      row.className = 'row';
+      row.className = `row grid ${kind}`;
       FIELDS[kind].forEach((f) => row.append(field(f, item)));
+      const actions = Object.assign(document.createElement('div'), { className: 'actions' });
       const save = Object.assign(document.createElement('button'), { type: 'submit', textContent: isNew ? 'Add' : 'Save' });
-      row.append(save);
+      actions.append(save);
+      row.append(actions);
       row.addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
@@ -97,14 +103,20 @@
           if (!confirm('Delete this entry?')) return;
           try { await call(`/${kind}/${item.id}`, 'DELETE'); say('Deleted.'); load(kind); } catch (err) { say(err.message); }
         });
-        row.append(del);
+        actions.append(del);
       }
       return row;
     }
 
+    function heading(kind) {
+      const head = Object.assign(document.createElement('div'), { className: `row grid head ${kind}` });
+      [...HEADINGS[kind], ''].forEach((text) => head.append(Object.assign(document.createElement('span'), { textContent: text })));
+      return head;
+    }
+
     async function load(kind) {
       const items = await call(`/${kind}`);
-      document.getElementById(kind).replaceChildren(...items.map((i) => build(kind, i, false)), build(kind, BLANK[kind], true));
+      document.getElementById(kind).replaceChildren(heading(kind), ...items.map((i) => build(kind, i, false)), build(kind, BLANK[kind], true));
     }
 
     document.getElementById('test').addEventListener('click', async () => {
