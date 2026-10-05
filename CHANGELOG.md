@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/snachodog/greenroom/compare/v1.2.0...v1.3.0) (2026-10-05)
+
+
+### Features
+
+* **ui:** show newest chat messages at the top ([9627d24](https://github.com/snachodog/greenroom/commit/9627d240bd151b9c6740ac405925bf9c7d81b67e))
+
 # [1.2.0](https://github.com/snachodog/greenroom/compare/v1.1.1...v1.2.0) (2026-10-05)
 
 
