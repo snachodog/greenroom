@@ -11,7 +11,10 @@
     <nav><a href="/settings.html">Settings</a></nav>
     <h1>Start a practice session</h1>
     <label>Stream title <input name="title" required maxlength="120" autofocus></label>
-    <label>Category <input name="category" required maxlength="60" placeholder="Just Chatting"></label>
+    <label>Category
+      <input name="category" id="category" list="categories" required autocomplete="off" placeholder="Start typing to search categories">
+      <datalist id="categories"></datalist>
+    </label>
     <label>Chat rate
       <select name="rate">
         <option value="quiet">Quiet</option>
@@ -25,12 +28,31 @@
   <script type="module">
     if (navigator.userAgent.includes('OBS')) location.replace('/');
     const form = document.getElementById('form');
+    const input = document.getElementById('category');
+    const byLower = new Map();
+    const loaded = fetch('/api/categories').then((r) => r.json()).then(({ categories }) => {
+      const list = document.getElementById('categories');
+      categories.forEach((name) => {
+        byLower.set(name.toLowerCase(), name);
+        list.append(Object.assign(document.createElement('option'), { value: name }));
+      });
+    });
+    const check = () => {
+      const match = byLower.get(input.value.trim().toLowerCase());
+      input.setCustomValidity(match ? '' : 'Choose a category from the list.');
+      return match;
+    };
+    input.addEventListener('input', check);
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      await loaded;
+      const category = check();
+      if (!category) return input.reportValidity();
+      const data = Object.fromEntries(new FormData(form));
       const res = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify({ ...data, category }),
       });
       if (res.ok) location.href = '/';
       else document.getElementById('error').textContent = 'Could not start the session.';

@@ -18,6 +18,8 @@ Self-hosted web app. Streamer-only dashboard (second monitor) showing an AI-simu
 ## File tree
 server/index.ts        Fastify setup, routes, ws
 server/db.ts           schema, migrations, seed
+server/categories.json Twitch category snapshot (data, no API calls)
+server/categories.ts   loads the snapshot, validates a category
 server/engine.ts       scheduler, persona picker, queue
 server/llm.ts          prompt build, batch call, JSON parse
 server/dedupe.ts       trigram similarity
@@ -42,7 +44,7 @@ test/engine.test.ts, test/dedupe.test.ts
 - 1s tick per active session. Rate setting: quiet ~90s, normal ~40s, busy ~15s between messages, +/-50% jitter.
 - Persona picker: never same persona twice in a row; max 1 message per persona per 3 min; skeptical personas only if enabled.
 - LLM batching: one call returns a JSON array of 5 messages {persona_id, kind, text}. Refill when queue < 2 or when topic changes (flush queue on topic change).
-- Prompt context: session title, category, current topic, last 10 sim messages, active persona cards. Messages max 200 chars, chat-style, no hashtags, no emoji spam, about 40% questions.
+- Prompt context: session title, category, current topic, last 10 sim messages, active persona cards. Messages max 200 chars, written like real Twitch chat (short, lowercase, slang, occasional emote words as plain text, replies with @name), no hashtags, no emoji, about 40% questions.
 - Dedupe: drop any message with trigram similarity > 0.6 against the last 30.
 - Followup: if a question is unacknowledged after 3 min, 30% chance the same persona sends a short followup.
 - Join events: every 4-8 min emit a "join" message ("<name> just showed up") which also fires a "Welcome them" reminder.
@@ -53,13 +55,13 @@ Seed defaults: ask for follow (20m), socials/Discord (30m), stream schedule (45m
 
 ## UI
 - Dashboard: chat column (persona color + SIM badge, click to acknowledge), topic input (Enter updates topic), rate selector, pause, reminder banners, session timer, End Session button.
-- Setup: title, category, rate, start.
+- Setup: title, category, rate, start. Category is a type-to-filter menu limited to the bundled Twitch category list (server/categories.json, a fixed snapshot dated inside the file). The app never fetches categories from Twitch.
 - Settings: personas CRUD, reminders CRUD, "Test LLM" button.
 - Report /report.html?id=N: duration, messages by kind, % questions acknowledged, reminders done vs fired.
 - Dark, high contrast, large font. Shortcuts: Space pause, T focus topic, D mark top reminder done.
 
 ## API
-REST JSON under /api (sessions, personas, reminders, messages/:id/ack, report/:id). WebSocket /ws pushes {type: "message"|"reminder"|"status", data}.
+REST JSON under /api (sessions, personas, reminders, categories, messages/:id/ack, report/:id). WebSocket /ws pushes {type: "message"|"reminder"|"status", data}.
 
 ## Phases
 P1: db, seed, setup page, dashboard, engine, llm batching, dedupe, ws, ack. Done when: a session starts, messages appear at the chosen rate, topic change flushes the queue, ack persists, tests pass.
