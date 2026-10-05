@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/snachodog/greenroom/compare/v1.1.1...v1.2.0) (2026-10-05)
+
+
+### Features
+
+* **ui:** add column headings to personas and reminders lists ([e82622c](https://github.com/snachodog/greenroom/commit/e82622c298dff82e6b729194428a3ac3d5197262))
+
 ## [1.1.1](https://github.com/snachodog/greenroom/compare/v1.1.0...v1.1.1) (2026-10-05)
 
 
