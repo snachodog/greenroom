@@ -73,6 +73,10 @@ const MIGRATIONS = [
     snoozed_until INTEGER
   );
   CREATE INDEX reminder_events_session ON reminder_events(session_id);`,
+  `CREATE TABLE app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );`,
 ];
 
 export type Reminder = {
@@ -159,4 +163,13 @@ export function insertMessage(
     .prepare('INSERT INTO messages (session_id, persona_id, kind, text, created_at) VALUES (@session_id, @persona_id, @kind, @text, @created_at)')
     .run(m);
   return getMessage(db, Number(r.lastInsertRowid))!;
+}
+
+export function getFlag(db: DB, key: string): boolean {
+  const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(key) as { value: string } | undefined;
+  return row?.value === 'true';
+}
+
+export function setFlag(db: DB, key: string, value: boolean) {
+  db.prepare('INSERT INTO app_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(key, String(value));
 }

@@ -24,6 +24,10 @@
       </form>
     </dialog>
 
+    <h2>Session</h2>
+    <label class="check"><input type="checkbox" id="end-on-close"> End the session when the dashboard tab is closed</label>
+    <p class="hint">The server waits 20 seconds first, so a reload does not end the session. While this page is open, the session stays running.</p>
+
     <h2>Language model</h2>
     <p><button id="test" type="button">Test LLM</button> <span id="test-result" class="hint"></span></p>
 
@@ -35,6 +39,8 @@
     <div id="reminders"></div>
   </main>
   <script type="module">
+    import { connect } from '/ws.js';
+
     const FIELDS = {
       personas: [
         ['name', 'text'], ['color', 'color'], ['style', 'text'], ['interests', 'text'],
@@ -150,6 +156,22 @@
         const r = await call('/llm/test', 'POST');
         out.textContent = r.ok ? `Works. ${r.count} messages in ${r.ms} ms. Sample: ${r.sample ?? 'none'}` : `Failed: ${r.error}`;
       } catch (err) { out.textContent = `Failed: ${err.message}`; }
+    });
+
+    const endOnClose = document.getElementById('end-on-close');
+    call('/settings').then((r) => { endOnClose.checked = r.end_session_on_close; });
+    endOnClose.addEventListener('change', async () => {
+      try {
+        await call('/settings', 'PUT', { end_session_on_close: endOnClose.checked });
+        say(endOnClose.checked ? 'The session will end when the dashboard tab is closed.' : 'The session will keep running when the tab is closed.');
+      } catch (err) {
+        endOnClose.checked = !endOnClose.checked;
+        say(err.message);
+      }
+    });
+
+    fetch('/api/sessions/active').then((r) => (r.ok ? r.json() : null)).then((active) => {
+      if (active) connect(active.id, () => {});
     });
 
     load('personas');

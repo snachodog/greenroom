@@ -56,7 +56,7 @@ Seed defaults: ask for follow (20m), socials/Discord (30m), stream schedule (45m
 ## UI
 - Dashboard: chat column (persona color + SIM badge, click to acknowledge), topic input (Enter updates topic), rate selector, pause, reminder banners, session timer, End Session button.
 - Setup: title, category, rate, start. Category is a type-to-filter menu limited to the bundled Twitch category list (server/categories.json, a fixed snapshot dated inside the file). The app never fetches categories from Twitch.
-- Settings: personas CRUD, reminders CRUD, "Test LLM" button.
+- Settings: personas CRUD, reminders CRUD, "Test LLM" button, and an option to end the session when the dashboard tab is closed (the server ends it after a 20 second grace period with no open page).
 - Report /report.html?id=N: duration, messages by kind, % questions acknowledged, reminders done vs fired.
 - Dark, high contrast, large font. Shortcuts: Space pause, T focus topic, D mark top reminder done.
 

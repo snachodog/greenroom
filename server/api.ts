@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import type { DB } from './db.js';
+import { getFlag, setFlag, type DB } from './db.js';
 import type { Generator } from './engine.js';
 import type { Reminders } from './reminders.js';
 
@@ -22,6 +22,8 @@ const reminderSchema = z.object({
   interval_min: z.number().int().min(0).max(720),
   enabled: flag,
 });
+
+const settingsSchema = z.object({ end_session_on_close: z.boolean() });
 
 const KINDS = ['comment', 'question', 'reaction', 'join', 'followup'];
 
@@ -56,6 +58,14 @@ export function registerApi(app: FastifyInstance, db: DB, generate: Generator, r
 
   crud('personas', 'personas', personaSchema, 'messages', 'This persona has messages in past sessions. Turn it off instead.');
   crud('reminders', 'reminders', reminderSchema, 'reminder_events', 'This reminder has history in past sessions. Disable it instead.');
+
+  app.get('/api/settings', async () => ({ end_session_on_close: getFlag(db, 'end_session_on_close') }));
+  app.put('/api/settings', async (req, reply) => {
+    const body = settingsSchema.safeParse(req.body);
+    if (!body.success) return reply.code(400).send({ error: body.error.message });
+    setFlag(db, 'end_session_on_close', body.data.end_session_on_close);
+    return body.data;
+  });
 
   app.get('/api/sessions/:id/reminders', async (req) => reminders.open(idOf(req)));
   app.post('/api/reminder-events/:id/done', async (req, reply) => reminders.done(idOf(req)) ?? reply.code(404).send({ error: 'not found' }));

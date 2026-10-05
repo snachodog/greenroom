@@ -5,7 +5,8 @@ import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import type { WebSocket } from 'ws';
-import { openDb, listMessages, type DB } from './db.js';
+import { openDb, listMessages, getFlag, type DB } from './db.js';
+import { Presence } from './presence.js';
 import { Engine, RATE_MS, type Generator } from './engine.js';
 import { Reminders } from './reminders.js';
 import { registerApi } from './api.js';
@@ -17,7 +18,10 @@ const rateSchema = z.enum(Object.keys(RATE_MS) as [keyof typeof RATE_MS, ...(key
 const createSchema = z.object({ title: z.string().trim().min(1).max(120), category: z.string().trim().refine((v) => canonicalCategory(v) !== undefined, 'Choose a category from the list.').transform((v) => canonicalCategory(v)!), rate: rateSchema.default('normal') });
 const patchSchema = z.object({ topic: z.string().trim().max(200).optional(), rate: rateSchema.optional(), paused: z.boolean().optional() });
 
-export async function buildApp(db: DB, generate: Generator, password?: string) {
+export const END_ON_CLOSE = 'end_session_on_close';
+const CLOSE_GRACE_MS = 20_000;
+
+export async function buildApp(db: DB, generate: Generator, password?: string, closeGraceMs = CLOSE_GRACE_MS) {
   const app = Fastify({ logger: { level: 'warn' } });
   const clients = new Map<number, Set<WebSocket>>();
 
@@ -28,6 +32,18 @@ export async function buildApp(db: DB, generate: Generator, password?: string) {
   const engine = new Engine(db, send, generate);
   const reminders = new Reminders(db, send);
   engine.onJoin = (sessionId, name) => reminders.fireOnEvent(sessionId, `${name} just showed up`);
+
+  const endSession = (id: number) => {
+    db.prepare('UPDATE sessions SET ended_at = COALESCE(ended_at, ?) WHERE id = ?').run(Date.now(), id);
+    engine.untrack(id);
+    reminders.untrack(id);
+    const status = engine.status(id);
+    send(id, 'status', status);
+    return status;
+  };
+  const presence = new Presence(closeGraceMs, (id) => {
+    if (getFlag(db, END_ON_CLOSE) && !clients.get(id)?.size) endSession(id);
+  });
 
   if (password) {
     app.addHook('onRequest', async (req, reply) => {
@@ -45,7 +61,11 @@ export async function buildApp(db: DB, generate: Generator, password?: string) {
     if (!Number.isInteger(id)) return socket.close();
     if (!clients.has(id)) clients.set(id, new Set());
     clients.get(id)!.add(socket);
-    socket.on('close', () => clients.get(id)?.delete(socket));
+    presence.opened(id);
+    socket.on('close', () => {
+      clients.get(id)?.delete(socket);
+      if (getFlag(db, END_ON_CLOSE)) presence.closed(id, clients.get(id)?.size ?? 0);
+    });
   });
 
   const session = (id: number) => db.prepare('SELECT * FROM sessions WHERE id = ?').get(id) as Record<string, unknown> | undefined;
@@ -107,12 +127,7 @@ export async function buildApp(db: DB, generate: Generator, password?: string) {
   app.post('/api/sessions/:id/end', async (req, reply) => {
     const id = idParam(req);
     if (!session(id)) return reply.code(404).send({ error: 'not found' });
-    db.prepare('UPDATE sessions SET ended_at = COALESCE(ended_at, ?) WHERE id = ?').run(Date.now(), id);
-    engine.untrack(id);
-    reminders.untrack(id);
-    const status = engine.status(id);
-    send(id, 'status', status);
-    return status;
+    return endSession(id);
   });
 
   app.post('/api/messages/:id/ack', async (req, reply) => {
@@ -131,6 +146,7 @@ export async function buildApp(db: DB, generate: Generator, password?: string) {
   app.addHook('onClose', async () => {
     engine.stop();
     reminders.stop();
+    presence.stop();
   });
   return app;
 }
