@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/snachodog/greenroom/compare/v1.6.0...v1.6.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **llm:** remove practice wording from the chat prompt ([fc42e1e](https://github.com/snachodog/greenroom/commit/fc42e1e89d634ea4ba948928f2b75d99af139fdf))
+
 # [1.6.0](https://github.com/snachodog/greenroom/compare/v1.5.0...v1.6.0) (2026-10-05)
 
 
