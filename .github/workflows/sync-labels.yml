@@ -1,0 +1,32 @@
+name: Sync Labels
+
+on:
+  workflow_call:
+    inputs:
+      labels-file:
+        description: Path to labels.yml relative to repo root
+        type: string
+        default: ".github/labels.yml"
+  # Also run directly on this repo when labels.yml changes
+  push:
+    paths:
+      - labels.yml
+    branches:
+      - main
+
+jobs:
+  sync:
+    name: Sync labels to GitHub
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync labels
+        uses: EndBug/add-and-delete-labels@v1
+        with:
+          config-file: ${{ inputs.labels-file || 'labels.yml' }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          delete-other-labels: false
