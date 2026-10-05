@@ -57,6 +57,39 @@ const MIGRATIONS = [
     acknowledged_at INTEGER
   );
   CREATE INDEX messages_session ON messages(session_id, id);`,
+  `CREATE TABLE reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    label TEXT NOT NULL,
+    text TEXT NOT NULL,
+    interval_min INTEGER NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1
+  );
+  CREATE TABLE reminder_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL REFERENCES sessions(id),
+    reminder_id INTEGER NOT NULL REFERENCES reminders(id),
+    fired_at INTEGER NOT NULL,
+    done_at INTEGER,
+    snoozed_until INTEGER
+  );
+  CREATE INDEX reminder_events_session ON reminder_events(session_id);`,
+];
+
+export type Reminder = {
+  id: number;
+  label: string;
+  text: string;
+  interval_min: number;
+  enabled: number;
+};
+
+const SEED_REMINDERS: Omit<Reminder, 'id'>[] = [
+  { label: 'Ask for follow', text: 'Ask viewers to follow the channel.', interval_min: 20, enabled: 1 },
+  { label: 'Socials and Discord', text: 'Mention your socials and your Discord.', interval_min: 30, enabled: 1 },
+  { label: 'Stream schedule', text: 'Tell viewers when you stream next.', interval_min: 45, enabled: 1 },
+  { label: 'Recap for new arrivals', text: 'Recap what you are doing for people who just arrived.', interval_min: 25, enabled: 1 },
+  { label: 'Hydrate and posture', text: 'Drink some water and check your posture.', interval_min: 60, enabled: 1 },
+  { label: 'Welcome them', text: 'Welcome the new viewer by name.', interval_min: 0, enabled: 1 },
 ];
 
 const SEED_PERSONAS: Omit<Persona, 'id'>[] = [
@@ -91,12 +124,17 @@ function migrate(db: DB) {
 }
 
 function seed(db: DB) {
-  const count = (db.prepare('SELECT COUNT(*) AS n FROM personas').get() as { n: number }).n;
-  if (count > 0) return;
-  const insert = db.prepare(
-    'INSERT INTO personas (name, color, style, interests, verbosity, skeptical, active) VALUES (@name, @color, @style, @interests, @verbosity, @skeptical, @active)',
-  );
-  db.transaction(() => SEED_PERSONAS.forEach((p) => insert.run(p)))();
+  const empty = (table: string) => (db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number }).n === 0;
+  if (empty('personas')) {
+    const insert = db.prepare(
+      'INSERT INTO personas (name, color, style, interests, verbosity, skeptical, active) VALUES (@name, @color, @style, @interests, @verbosity, @skeptical, @active)',
+    );
+    db.transaction(() => SEED_PERSONAS.forEach((p) => insert.run(p)))();
+  }
+  if (empty('reminders')) {
+    const insert = db.prepare('INSERT INTO reminders (label, text, interval_min, enabled) VALUES (@label, @text, @interval_min, @enabled)');
+    db.transaction(() => SEED_REMINDERS.forEach((r) => insert.run(r)))();
+  }
 }
 
 const MESSAGE_SELECT = `SELECT m.*, p.name AS persona_name, p.color AS persona_color
