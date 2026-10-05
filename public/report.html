@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greenroom report</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="page">
+    <nav><a href="/setup.html">New session</a><a href="/settings.html">Settings</a></nav>
+    <h1 id="title">Session report</h1>
+    <p class="hint" id="when"></p>
+    <div class="tiles" id="tiles"></div>
+  </main>
+  <script type="module">
+    const id = new URLSearchParams(location.search).get('id');
+    const res = await fetch(`/api/report/${encodeURIComponent(id)}`);
+    if (!res.ok) {
+      document.getElementById('title').textContent = 'Report not found';
+    } else {
+      const r = await res.json();
+      const p = (n) => String(n).padStart(2, '0');
+      const secs = Math.floor(r.duration_ms / 1000);
+      const duration = `${p(Math.floor(secs / 3600))}:${p(Math.floor(secs / 60) % 60)}:${p(secs % 60)}`;
+      document.getElementById('title').textContent = `${r.session.title} · ${r.session.category}`;
+      document.getElementById('when').textContent = `Started ${new Date(r.session.started_at).toLocaleString()}${r.session.ended_at ? '' : ' (still running)'}`;
+      const q = r.questions;
+      const tiles = [
+        ['Duration', duration],
+        ['Messages', r.messages_total, Object.entries(r.by_kind).map(([k, n]) => `${k}: ${n}`)],
+        ['Questions acknowledged', q.percent === null ? 'n/a' : `${q.percent}%`, [`${q.acknowledged} of ${q.total}`]],
+        ['Reminders done', `${r.reminders.done} of ${r.reminders.fired}`, ['done against fired']],
+      ];
+      const root = document.getElementById('tiles');
+      for (const [name, value, lines] of tiles) {
+        const tile = Object.assign(document.createElement('div'), { className: 'tile' });
+        tile.append(Object.assign(document.createElement('div'), { textContent: name, className: 'hint' }));
+        tile.append(Object.assign(document.createElement('div'), { textContent: value, className: 'num' }));
+        if (lines) {
+          const ul = document.createElement('ul');
+          lines.forEach((l) => ul.append(Object.assign(document.createElement('li'), { textContent: l })));
+          tile.append(ul);
+        }
+        root.append(tile);
+      }
+    }
+  </script>
+</body>
+</html>

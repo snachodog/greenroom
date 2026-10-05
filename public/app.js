@@ -56,6 +56,33 @@ async function init() {
     el.replaceChildren(badge, name, text);
   }
 
+  const banners = $('banners');
+  const bannerEls = new Map();
+
+  function reminder(r) {
+    bannerEls.get(r.id)?.remove();
+    bannerEls.delete(r.id);
+    if (r.state !== 'fired') return;
+    const el = document.createElement('div');
+    el.className = 'banner';
+    const what = document.createElement('div');
+    what.className = 'what';
+    const label = Object.assign(document.createElement('strong'), { textContent: r.label });
+    what.append(label, ` ${r.detail ?? r.text}`);
+    const done = Object.assign(document.createElement('button'), { textContent: 'Done', type: 'button' });
+    const snooze = Object.assign(document.createElement('button'), { textContent: 'Snooze 5m', type: 'button' });
+    done.addEventListener('click', () => resolve(r.id, 'done'));
+    snooze.addEventListener('click', () => resolve(r.id, 'snooze'));
+    el.append(what, done, snooze);
+    el.dataset.id = r.id;
+    bannerEls.set(r.id, el);
+    banners.append(el);
+  }
+
+  async function resolve(id, action) {
+    reminder(await api(`/reminder-events/${id}/${action}`, 'POST'));
+  }
+
   async function ack(id) {
     render(await api(`/messages/${id}/ack`, 'POST'));
   }
@@ -65,15 +92,17 @@ async function init() {
     $('pause').textContent = paused ? 'Resume' : 'Pause';
     $('rate').value = s.rate;
     if (document.activeElement !== $('topic')) $('topic').value = s.topic;
-    if (s.ended) location.replace('/setup.html');
+    if (s.ended) location.replace(`/report.html?id=${active.id}`);
   }
 
   (await api(`/sessions/${active.id}/messages`)).forEach(render);
   chat.scrollTop = chat.scrollHeight;
+  (await api(`/sessions/${active.id}/reminders`)).forEach(reminder);
   applyStatus(session);
   connect(active.id, ({ type, data }) => {
     if (type === 'message') render(data);
     else if (type === 'status') applyStatus(data);
+    else if (type === 'reminder') reminder(data);
   });
 
   const patch = (body) => api(`/sessions/${active.id}`, 'PATCH', body).then(applyStatus);
@@ -85,7 +114,7 @@ async function init() {
   $('end').addEventListener('click', async () => {
     if (confirm('End this session?')) {
       await api(`/sessions/${active.id}/end`, 'POST');
-      location.replace('/setup.html');
+      location.replace(`/report.html?id=${active.id}`);
     }
   });
 
@@ -93,6 +122,7 @@ async function init() {
     if (e.target.matches('input, select, textarea') || e.ctrlKey || e.metaKey) return;
     if (e.code === 'Space') { e.preventDefault(); patch({ paused: !paused }); }
     if (e.key.toLowerCase() === 't') { e.preventDefault(); $('topic').focus(); }
+    if (e.key.toLowerCase() === 'd') banners.firstElementChild?.querySelector('button')?.click();
   });
 
   setInterval(() => {

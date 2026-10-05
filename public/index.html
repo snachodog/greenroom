@@ -10,6 +10,7 @@
   <main class="app" id="app" hidden>
     <header class="bar">
       <h1 id="title">Greenroom</h1>
+      <a href="/settings.html">Settings</a>
       <input id="topic" placeholder="Current topic (Enter to update)  [T]" autocomplete="off">
       <select id="rate" aria-label="Chat rate">
         <option value="quiet">Quiet</option>
@@ -20,6 +21,7 @@
       <span id="timer">00:00:00</span>
       <button id="end" type="button">End Session</button>
     </header>
+    <section id="banners" aria-live="assertive"></section>
     <section id="chat" aria-live="polite"></section>
   </main>
   <script type="module" src="/app.js"></script>
