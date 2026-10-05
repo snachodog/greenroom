@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Simulated practice chat for streamers",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "start": "tsx server/index.ts",
