@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greenroom setup</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <form class="setup" id="form">
+    <h1>Start a practice session</h1>
+    <label>Stream title <input name="title" required maxlength="120" autofocus></label>
+    <label>Category <input name="category" required maxlength="60" placeholder="Just Chatting"></label>
+    <label>Chat rate
+      <select name="rate">
+        <option value="quiet">Quiet</option>
+        <option value="normal" selected>Normal</option>
+        <option value="busy">Busy</option>
+      </select>
+    </label>
+    <button type="submit">Start</button>
+    <p class="hint" id="error"></p>
+  </form>
+  <script type="module">
+    if (navigator.userAgent.includes('OBS')) location.replace('/');
+    const form = document.getElementById('form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      if (res.ok) location.href = '/';
+      else document.getElementById('error').textContent = 'Could not start the session.';
+    });
+  </script>
+</body>
+</html>

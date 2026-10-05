@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greenroom</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="app" id="app" hidden>
+    <header class="bar">
+      <h1 id="title">Greenroom</h1>
+      <input id="topic" placeholder="Current topic (Enter to update)  [T]" autocomplete="off">
+      <select id="rate" aria-label="Chat rate">
+        <option value="quiet">Quiet</option>
+        <option value="normal">Normal</option>
+        <option value="busy">Busy</option>
+      </select>
+      <button id="pause" type="button">Pause</button>
+      <span id="timer">00:00:00</span>
+      <button id="end" type="button">End Session</button>
+    </header>
+    <section id="chat" aria-live="polite"></section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
