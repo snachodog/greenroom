@@ -51,6 +51,8 @@ docker compose up -d --build
 
 The app is at http://127.0.0.1:3000. Compose publishes the port on 127.0.0.1 only. Set `BIND_ADDRESS=0.0.0.0` to reach it from another machine, and set `APP_PASSWORD` when you do. SQLite data lives in the `greenroom-data` volume, mounted at /data.
 
+Every release publishes a multi-architecture image (amd64 and arm64) to `ghcr.io/snachodog/greenroom`, tagged with the version and `latest`. To use it instead of building, run `docker compose pull && docker compose up -d`. If the package is private, run `docker login ghcr.io` first with a token that has the `read:packages` scope.
+
 ## Run it without Docker
 
 ```

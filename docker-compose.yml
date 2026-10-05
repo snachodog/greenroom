@@ -1,5 +1,6 @@
 services:
   greenroom:
+    image: ghcr.io/snachodog/greenroom:latest
     build: .
     restart: unless-stopped
     ports:
