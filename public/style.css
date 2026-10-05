@@ -40,15 +40,17 @@ a { color: var(--accent); }
 .tile ul { margin: 6px 0 0; padding-left: 20px; }
 #status { min-height: 1.6em; color: var(--accent); }
 .row.grid { display: grid; gap: 8px; align-items: center; }
-.row.personas { grid-template-columns: minmax(150px, 1.2fr) 56px minmax(140px, 2fr) minmax(140px, 2fr) 124px 90px 70px 180px; }
-.row.reminders { grid-template-columns: minmax(230px, 1.2fr) minmax(200px, 3fr) 120px 90px 180px; }
+.row.personas { grid-template-columns: 170px minmax(150px, 1.2fr) 56px minmax(140px, 2fr) minmax(140px, 2fr) 124px 90px 70px; }
+.row.reminders { grid-template-columns: 170px minmax(230px, 1.2fr) minmax(200px, 3fr) 120px 90px; }
 .row.grid input[type=text], .row.grid input[type=number], .row.grid select { width: 100%; min-width: 0; flex: none; }
 .row.grid label { justify-content: center; }
 .row.head { padding: 6px 0; border-bottom: 2px solid var(--line); color: var(--muted); font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-.row.head.personas span:nth-child(2) { text-align: center; }
-.actions { display: flex; gap: 8px; }
+.row.head.personas span:nth-child(3) { text-align: center; }
+.actions { display: flex; flex-wrap: nowrap; gap: 8px; }
+.actions button { white-space: nowrap; }
+.actions.end { justify-content: flex-end; margin-top: 20px; }
 .cb-text { display: none; }
-@media (max-width: 960px) {
+@media (max-width: 1060px) {
   .row.grid { display: flex; flex-wrap: wrap; }
   .row.grid label { justify-content: flex-start; }
   .row.head { display: none; }
@@ -56,3 +58,10 @@ a { color: var(--accent); }
 }
 .row.personas, .row.reminders { padding-left: 8px; padding-right: 8px; border-radius: 6px; }
 .row.personas:not(.head):nth-child(odd), .row.reminders:not(.head):nth-child(odd) { background: color-mix(in srgb, var(--fg) 9%, transparent); }
+button.danger { background: #e8112d; border-color: #e8112d; color: #fff; font-weight: 700; }
+button.danger:hover, button.danger:focus-visible { background: #ff2b47; border-color: #fff; }
+dialog { background: var(--panel); color: var(--fg); border: 2px solid #e8112d; border-radius: 12px; padding: 24px; max-width: 460px; }
+dialog::backdrop { background: rgba(0, 0, 0, 0.75); }
+dialog h2 { margin: 0 0 12px; }
+dialog p { margin: 0 0 8px; }
+dialog .warning { color: #ff6b7d; font-weight: 700; }

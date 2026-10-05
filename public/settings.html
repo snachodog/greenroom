@@ -12,6 +12,18 @@
     <h1>Settings</h1>
     <p id="status" role="status"></p>
 
+    <dialog id="confirm" aria-labelledby="confirm-title">
+      <form method="dialog">
+        <h2 id="confirm-title">Delete this entry?</h2>
+        <p id="confirm-text"></p>
+        <p class="warning">This cannot be undone.</p>
+        <div class="actions end">
+          <button value="cancel" autofocus>Cancel</button>
+          <button value="delete" class="danger">Delete</button>
+        </div>
+      </form>
+    </dialog>
+
     <h2>Language model</h2>
     <p><button id="test" type="button">Test LLM</button> <span id="test-result" class="hint"></span></p>
 
@@ -84,11 +96,11 @@
     function build(kind, item, isNew) {
       const row = document.createElement('form');
       row.className = `row grid ${kind}`;
-      FIELDS[kind].forEach((f) => row.append(field(f, item)));
       const actions = Object.assign(document.createElement('div'), { className: 'actions' });
       const save = Object.assign(document.createElement('button'), { type: 'submit', textContent: isNew ? 'Add' : 'Save' });
       actions.append(save);
       row.append(actions);
+      FIELDS[kind].forEach((f) => row.append(field(f, item)));
       row.addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
@@ -98,9 +110,9 @@
         } catch (err) { say(err.message); }
       });
       if (!isNew) {
-        const del = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Delete' });
+        const del = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Delete', className: 'danger' });
         del.addEventListener('click', async () => {
-          if (!confirm('Delete this entry?')) return;
+          if (!(await confirmDelete(kind, item))) return;
           try { await call(`/${kind}/${item.id}`, 'DELETE'); say('Deleted.'); load(kind); } catch (err) { say(err.message); }
         });
         actions.append(del);
@@ -108,9 +120,21 @@
       return row;
     }
 
+    function confirmDelete(kind, item) {
+      const dialog = document.getElementById('confirm');
+      const noun = kind === 'personas' ? 'persona' : 'reminder';
+      document.getElementById('confirm-title').textContent = `Delete this ${noun}?`;
+      document.getElementById('confirm-text').textContent = `"${item.name ?? item.label}" will be removed permanently.`;
+      dialog.returnValue = '';
+      return new Promise((resolve) => {
+        dialog.addEventListener('close', () => resolve(dialog.returnValue === 'delete'), { once: true });
+        dialog.showModal();
+      });
+    }
+
     function heading(kind) {
       const head = Object.assign(document.createElement('div'), { className: `row grid head ${kind}` });
-      [...HEADINGS[kind], ''].forEach((text) => head.append(Object.assign(document.createElement('span'), { textContent: text })));
+      ['', ...HEADINGS[kind]].forEach((text) => head.append(Object.assign(document.createElement('span'), { textContent: text })));
       return head;
     }
 
