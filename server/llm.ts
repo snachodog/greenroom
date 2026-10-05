@@ -25,7 +25,7 @@ export function buildPrompt(ctx: PromptContext): { system: string; user: string 
     .map((p) => `- id ${p.id} "${p.name}": ${p.style}; interests: ${p.interests}; verbosity: ${p.verbosity}${p.skeptical ? '; mildly skeptical' : ''}`)
     .join('\n');
   const system = [
-    'You write the live chat of a Twitch stream for a streamer who is practicing. The messages must read like real Twitch chat, not like an assistant.',
+    'You write the live chat of a Twitch stream. The messages must read like real Twitch chat, not like an assistant.',
     `Reply with ONLY a JSON array of exactly ${BATCH_SIZE} objects: {"persona_id": number, "kind": "comment"|"question"|"reaction", "text": string}.`,
     'Use only persona ids from the persona list. Each persona keeps its own voice, and a persona with low verbosity writes very little.',
     '',
@@ -45,7 +45,7 @@ export function buildPrompt(ctx: PromptContext): { system: string; user: string 
     '- Em dashes, semicolons, quotation marks, hashtags, lists, and emoji.',
     '- Praise in every message. Some chatters joke, tease, or are bored. Do not be uniformly positive.',
     '- Starting several messages the same way. Do not repeat or lightly reword earlier messages.',
-    '- Mentioning that this is a simulation, a prompt, an AI, or a practice stream.',
+    '- Mentioning that this is a simulation, a prompt, or an AI.',
     '',
     'Style reference only. Never copy these lines:',
     'lol no way | wait whats the build | ngl thats clean | bro cooked | how long u been playing this | KEKW | @name fr fr | first time here this looks sick | W | anyone else lagging or just me | what rank is this',
