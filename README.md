@@ -36,22 +36,32 @@ Talking to an empty chat is hard to practice. Greenroom gives you a realistic au
 | Phase | Scope | State |
 |-------|-------|-------|
 | 1 | Sessions, personas, engine, LLM batching, dedupe, live chat, acknowledgements | Done |
-| 2 | Reminders, settings, report, auth, Docker, full setup guide | Planned |
+| 2 | Reminders, settings, report, auth, Docker | Done |
 
 ## Stack
 
 Node 22, TypeScript run with tsx, Fastify, SQLite (better-sqlite3), zod, and vitest. The frontend is plain HTML, CSS, and JavaScript modules. Any OpenAI-compatible chat completions API can power the audience.
 
-## Run it
+## Run it with Docker
+
+```
+cp .env.example .env     # then fill in the LLM values
+docker compose up -d --build
+```
+
+The app is at http://127.0.0.1:3000. Compose publishes the port on 127.0.0.1 only. Set `BIND_ADDRESS=0.0.0.0` to reach it from another machine, and set `APP_PASSWORD` when you do. SQLite data lives in the `greenroom-data` volume, mounted at /data.
+
+## Run it without Docker
 
 ```
 nvm use          # or install Node 22
 npm ci
-cp .env.example .env
 npm start        # http://127.0.0.1:3000
 ```
 
-Set these in your environment:
+The app does not read `.env` by itself. Export the values, or start it with `npx tsx --env-file=.env server/index.ts`.
+
+## Configuration
 
 | Variable | Purpose |
 |----------|---------|
@@ -61,8 +71,16 @@ Set these in your environment:
 | HOST | Bind address. Default 127.0.0.1 |
 | PORT | Port. Default 3000 |
 | DATA_DIR | Folder for the SQLite file. Default ./data |
+| APP_PASSWORD | Basic auth password. Enforced only when HOST is not local. Any user name works |
 
-The app does not read `.env` by itself. Export the values, or start it with `npx tsx --env-file=.env server/index.ts`.
+If HOST is not local and APP_PASSWORD is empty, the server starts and prints a warning. The `/healthz` path never needs a password.
+
+## Using it
+
+1. Open the settings page to review personas and reminders, and press Test LLM to check your API settings.
+2. Start a session from the setup page.
+3. On the dashboard, click a message to acknowledge it. Press Space to pause, T to edit the topic, and D to mark the top reminder done.
+4. End the session to see its report.
 
 ## Out of scope
 
