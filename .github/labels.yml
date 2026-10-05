@@ -1,0 +1,111 @@
+# GitHub label definitions.
+# Apply with: gh label import labels.yml  (GitHub CLI built-in as of gh 2.x)
+# Or use the sync-labels.yml workflow in workflows/.
+#
+# Color values are hex without the #.
+
+# ── Type ──────────────────────────────────────────────────────────────────────
+- name: "type: bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "type: feature"
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: "type: docs"
+  color: "0075ca"
+  description: "Documentation improvements"
+
+- name: "type: refactor"
+  color: "e4e669"
+  description: "Code restructure with no behavior change"
+
+- name: "type: chore"
+  color: "fef2c0"
+  description: "Repo hygiene, deps, config"
+
+- name: "type: ci"
+  color: "bfd4f2"
+  description: "Workflow or pipeline changes"
+
+# ── Status ────────────────────────────────────────────────────────────────────
+- name: "status: needs triage"
+  color: "ededed"
+  description: "Awaiting initial review"
+
+- name: "status: in progress"
+  color: "fbca04"
+  description: "Actively being worked on"
+
+- name: "status: blocked"
+  color: "e4e669"
+  description: "Waiting on external dependency or decision"
+
+- name: "status: needs review"
+  color: "0e8a16"
+  description: "PR or issue ready for review"
+
+- name: "status: wontfix"
+  color: "ffffff"
+  description: "This will not be worked on"
+
+- name: "status: duplicate"
+  color: "cfd3d7"
+  description: "This issue or PR already exists"
+
+- name: "status: invalid"
+  color: "e4e669"
+  description: "This doesn't seem right"
+
+# ── Priority ──────────────────────────────────────────────────────────────────
+- name: "priority: critical"
+  color: "b60205"
+  description: "Must be fixed immediately"
+
+- name: "priority: high"
+  color: "e11d48"
+  description: "Fix in current cycle"
+
+- name: "priority: medium"
+  color: "f97316"
+  description: "Fix in next cycle"
+
+- name: "priority: low"
+  color: "fbbf24"
+  description: "Nice to have, no urgency"
+
+# ── Effort ────────────────────────────────────────────────────────────────────
+- name: "effort: quick"
+  color: "d1fae5"
+  description: "Under an hour"
+
+- name: "effort: small"
+  color: "a7f3d0"
+  description: "Half a day"
+
+- name: "effort: medium"
+  color: "6ee7b7"
+  description: "A few days"
+
+- name: "effort: large"
+  color: "34d399"
+  description: "A week or more"
+
+# ── Good for contributors ─────────────────────────────────────────────────────
+- name: "good first issue"
+  color: "7057ff"
+  description: "Good for newcomers"
+
+- name: "help wanted"
+  color: "008672"
+  description: "Extra attention is needed"
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+- name: "dependencies"
+  color: "0366d6"
+  description: "Dependency updates"
+
+- name: "security"
+  color: "d73a4a"
+  description: "Security-related issue or fix"
