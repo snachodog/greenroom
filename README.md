@@ -1,28 +1,32 @@
 # Greenroom
 
-Greenroom is a practice room for streamers. It fills a private dashboard with a simulated chat audience, so you can rehearse a stream before you go live.
+Greenroom is a simulated audience for streamers. It keeps a private chat moving on your second monitor, so a quiet stream never feels empty, and it reminds you to do the small things that help a channel grow.
 
 Only you see it. Simulated messages never reach viewers, and the app never talks to a streaming platform.
 
 ## Why
 
-Talking to an empty chat is hard to practice. Greenroom gives you a realistic audience on a second monitor. You can learn to read chat, answer questions, and keep a steady pace. You can also build habits, such as asking for follows and welcoming new arrivals, before the stakes are real.
+Streaming to a small or empty chat is hard. Silence makes it easy to run out of things to say, and easy to forget the basics, such as asking for a follow or welcoming someone who just arrived. Greenroom gives you messages to react to, questions to answer, and viewers to welcome, so you keep talking. Timed reminders cover the routine tasks so you do not have to track them yourself.
 
-## Aspirations
+Greenroom does not listen to you and does not detect silence. It keeps chat flowing at the pace you set, and it nudges you on a schedule.
 
-### A believable audience
-- A cast of personas: a curious newcomer, a longtime regular, a topic expert, a lurker, a question-asker, a hype friend, and a practical tip-sharer. A mildly skeptical persona is available when you want pushback.
-- Messages arrive at a pace you choose: quiet, normal, or busy.
-- About four in ten messages are questions. Unanswered questions can bring a short followup.
+## What it does
+
+### Chat that keeps the room alive
+- A cast of personas: a curious newcomer, a longtime regular, a topic expert, a lurker, a question-asker, a hype friend, and a practical tip-sharer. A mildly skeptical persona is available when you want some pushback.
+- Messages read like real Twitch chat: short, casual, and tied to your category and topic.
+- You choose the pace: quiet, normal, or busy.
+- About four in ten messages are questions, which gives you something to answer. Unanswered questions can bring a short followup.
 - New viewers show up every few minutes.
 - Chat follows your topic. When you change the topic, the audience changes with it.
 - Repeated or near-identical messages are filtered out.
 
-### Gentle prompts for good habits
+### Reminders that prompt you
 - Timed reminders to ask for a follow, mention your socials, share your schedule, recap for new arrivals, and drink water.
+- A reminder to welcome each new viewer by name.
 - Each reminder has Done and Snooze. Every reminder and its outcome is logged.
 
-### A useful look back
+### A look back
 - A report after each session: duration, messages by kind, how many questions you answered, and reminders done against reminders fired.
 
 ## Safety rules
