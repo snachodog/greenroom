@@ -7,20 +7,34 @@ import { join } from 'node:path';
 import type { WebSocket } from 'ws';
 import { openDb, listMessages, type DB } from './db.js';
 import { Engine, RATE_MS, type Generator } from './engine.js';
+import { Reminders } from './reminders.js';
+import { registerApi } from './api.js';
+import { authRequired, checkBasic } from './auth.js';
 import { fetchBatch, llmConfigFromEnv } from './llm.js';
 
 const rateSchema = z.enum(Object.keys(RATE_MS) as [keyof typeof RATE_MS, ...(keyof typeof RATE_MS)[]]);
 const createSchema = z.object({ title: z.string().trim().min(1).max(120), category: z.string().trim().min(1).max(60), rate: rateSchema.default('normal') });
 const patchSchema = z.object({ topic: z.string().trim().max(200).optional(), rate: rateSchema.optional(), paused: z.boolean().optional() });
 
-export async function buildApp(db: DB, generate: Generator) {
+export async function buildApp(db: DB, generate: Generator, password?: string) {
   const app = Fastify({ logger: { level: 'warn' } });
   const clients = new Map<number, Set<WebSocket>>();
 
-  const engine = new Engine(db, (sessionId, type, data) => {
+  const send = (sessionId: number, type: string, data: unknown) => {
     const payload = JSON.stringify({ type, data });
     clients.get(sessionId)?.forEach((ws) => ws.readyState === 1 && ws.send(payload));
-  }, generate);
+  };
+  const engine = new Engine(db, send, generate);
+  const reminders = new Reminders(db, send);
+  engine.onJoin = (sessionId, name) => reminders.fireOnEvent(sessionId, `${name} just showed up`);
+
+  if (password) {
+    app.addHook('onRequest', async (req, reply) => {
+      if (req.url === '/healthz' || checkBasic(req.headers.authorization, password)) return;
+      return reply.header('www-authenticate', 'Basic realm="greenroom"').code(401).send('Authentication required');
+    });
+  }
+  app.get('/healthz', async () => ({ ok: true }));
 
   await app.register(websocket);
   await app.register(fastifyStatic, { root: join(fileURLToPath(import.meta.url), '../../public') });
@@ -36,8 +50,6 @@ export async function buildApp(db: DB, generate: Generator) {
   const session = (id: number) => db.prepare('SELECT * FROM sessions WHERE id = ?').get(id) as Record<string, unknown> | undefined;
   const idParam = (req: { params: unknown }) => Number((req.params as { id: string }).id);
 
-  app.get('/api/personas', async () => db.prepare('SELECT * FROM personas ORDER BY id').all());
-
   app.get('/api/sessions/active', async (_req, reply) => {
     const row = db.prepare('SELECT id FROM sessions WHERE ended_at IS NULL ORDER BY id DESC LIMIT 1').get() as { id: number } | undefined;
     return row ? { id: row.id } : reply.code(404).send({ error: 'no active session' });
@@ -50,12 +62,14 @@ export async function buildApp(db: DB, generate: Generator) {
     open.forEach((r) => {
       db.prepare('UPDATE sessions SET ended_at = ? WHERE id = ?').run(Date.now(), r.id);
       engine.untrack(r.id);
+      reminders.untrack(r.id);
     });
     const r = db
       .prepare('INSERT INTO sessions (started_at, title, category, settings_json) VALUES (?, ?, ?, ?)')
       .run(Date.now(), body.data.title, body.data.category, JSON.stringify({ rate: body.data.rate, paused: false }));
     const id = Number(r.lastInsertRowid);
     engine.track(id);
+    reminders.track(id);
     return reply.code(201).send(session(id));
   });
 
@@ -83,7 +97,7 @@ export async function buildApp(db: DB, generate: Generator) {
       db.prepare('UPDATE sessions SET settings_json = ? WHERE id = ?').run(JSON.stringify(next), id);
     }
     const status = engine.status(id);
-    clients.get(id)?.forEach((ws) => ws.readyState === 1 && ws.send(JSON.stringify({ type: 'status', data: status })));
+    send(id, 'status', status);
     return status;
   });
 
@@ -92,8 +106,9 @@ export async function buildApp(db: DB, generate: Generator) {
     if (!session(id)) return reply.code(404).send({ error: 'not found' });
     db.prepare('UPDATE sessions SET ended_at = COALESCE(ended_at, ?) WHERE id = ?').run(Date.now(), id);
     engine.untrack(id);
+    reminders.untrack(id);
     const status = engine.status(id);
-    clients.get(id)?.forEach((ws) => ws.readyState === 1 && ws.send(JSON.stringify({ type: 'status', data: status })));
+    send(id, 'status', status);
     return status;
   });
 
@@ -104,15 +119,28 @@ export async function buildApp(db: DB, generate: Generator) {
     return msg ?? reply.code(404).send({ error: 'not found' });
   });
 
-  app.addHook('onReady', async () => engine.start());
-  app.addHook('onClose', async () => engine.stop());
+  registerApi(app, db, generate, reminders);
+
+  app.addHook('onReady', async () => {
+    engine.start();
+    reminders.start();
+  });
+  app.addHook('onClose', async () => {
+    engine.stop();
+    reminders.stop();
+  });
   return app;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const db = openDb(join(process.env.DATA_DIR ?? './data', 'greenroom.sqlite'));
   const cfg = llmConfigFromEnv();
-  const app = await buildApp(db, (ctx) => fetchBatch(cfg, ctx));
   const host = process.env.HOST ?? '127.0.0.1';
+  const password = process.env.APP_PASSWORD;
+  const protectedAccess = authRequired(host, password);
+  if (!protectedAccess && !['127.0.0.1', 'localhost', '::1'].includes(host)) {
+    console.warn('HOST is not local and APP_PASSWORD is not set. The dashboard is open to the network.');
+  }
+  const app = await buildApp(db, (ctx) => fetchBatch(cfg, ctx), protectedAccess ? password : undefined);
   await app.listen({ host, port: Number(process.env.PORT ?? 3000) });
 }
