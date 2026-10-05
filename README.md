@@ -83,7 +83,7 @@ If HOST is not local and APP_PASSWORD is empty, the server starts and prints a w
 2. Start a session from the setup page.
 3. On the setup page, pick a category by typing and choosing from the list. The list is a snapshot of Twitch categories dated 2026-10-05, stored in `server/categories.json`. The app never contacts Twitch. To refresh it, edit that file.
 4. On the dashboard, click a message to acknowledge it. Press Space to pause, T to edit the topic, and D to mark the top reminder done.
-5. End the session to see its report.
+5. End the session to see its report. Or turn on "End the session when the dashboard tab is closed" in settings. The server then ends the session 20 seconds after the last dashboard or settings page disconnects, so a reload does not end it.
 
 ## Out of scope
 
