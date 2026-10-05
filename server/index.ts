@@ -10,10 +10,11 @@ import { Engine, RATE_MS, type Generator } from './engine.js';
 import { Reminders } from './reminders.js';
 import { registerApi } from './api.js';
 import { authRequired, checkBasic } from './auth.js';
+import { CATEGORIES, SNAPSHOT_DATE, canonicalCategory } from './categories.js';
 import { fetchBatch, llmConfigFromEnv } from './llm.js';
 
 const rateSchema = z.enum(Object.keys(RATE_MS) as [keyof typeof RATE_MS, ...(keyof typeof RATE_MS)[]]);
-const createSchema = z.object({ title: z.string().trim().min(1).max(120), category: z.string().trim().min(1).max(60), rate: rateSchema.default('normal') });
+const createSchema = z.object({ title: z.string().trim().min(1).max(120), category: z.string().trim().refine((v) => canonicalCategory(v) !== undefined, 'Choose a category from the list.').transform((v) => canonicalCategory(v)!), rate: rateSchema.default('normal') });
 const patchSchema = z.object({ topic: z.string().trim().max(200).optional(), rate: rateSchema.optional(), paused: z.boolean().optional() });
 
 export async function buildApp(db: DB, generate: Generator, password?: string) {
@@ -49,6 +50,8 @@ export async function buildApp(db: DB, generate: Generator, password?: string) {
 
   const session = (id: number) => db.prepare('SELECT * FROM sessions WHERE id = ?').get(id) as Record<string, unknown> | undefined;
   const idParam = (req: { params: unknown }) => Number((req.params as { id: string }).id);
+
+  app.get('/api/categories', async () => ({ snapshot: SNAPSHOT_DATE, categories: CATEGORIES }));
 
   app.get('/api/sessions/active', async (_req, reply) => {
     const row = db.prepare('SELECT id FROM sessions WHERE ended_at IS NULL ORDER BY id DESC LIMIT 1').get() as { id: number } | undefined;
