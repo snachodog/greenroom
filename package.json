@@ -3,7 +3,7 @@
   "version": "1.6.0",
   "private": true,
   "type": "module",
-  "description": "Simulated practice chat for streamers",
+  "description": "Simulated chat audience and reminders for streamers",
   "engines": {
     "node": ">=22"
   },
