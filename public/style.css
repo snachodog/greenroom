@@ -6,7 +6,7 @@ button { cursor: pointer; }
 button:hover, button:focus-visible, input:focus, select:focus { border-color: var(--accent); outline: none; }
 .setup { max-width: 560px; margin: 8vh auto; padding: 0 20px; display: grid; gap: 16px; }
 .setup label { display: grid; gap: 6px; color: var(--muted); }
-.app { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+.app { display: grid; grid-template-rows: auto auto 1fr; height: 100vh; }
 .bar { display: flex; gap: 12px; align-items: center; padding: 12px 20px; background: var(--panel); border-bottom: 2px solid var(--line); flex-wrap: wrap; }
 .bar h1 { font-size: 1.1rem; margin: 0 auto 0 0; }
 #topic { flex: 1 1 280px; }
@@ -21,3 +21,21 @@ button:hover, button:focus-visible, input:focus, select:focus { border-color: va
 .hint { color: var(--muted); font-size: 0.8em; }
 .warn { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; background: #b00020; color: #fff; font-size: 2.2rem; padding: 40px; }
 [hidden] { display: none !important; }
+a { color: var(--accent); }
+#banners { display: grid; gap: 8px; padding: 0 20px; }
+#banners:not(:empty) { padding-top: 12px; }
+.banner { display: flex; gap: 12px; align-items: center; padding: 10px 14px; background: #3a2f00; border: 2px solid var(--accent); border-radius: 8px; }
+.banner .what { flex: 1; }
+.page { max-width: 1000px; margin: 0 auto; padding: 20px; }
+.page nav { display: flex; gap: 16px; margin-bottom: 8px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.row input[type=text], .row input[type=number] { flex: 1 1 160px; min-width: 0; }
+.row input[type=number] { flex: 0 0 90px; }
+.row input[type=color] { padding: 2px; width: 48px; height: 42px; }
+.row label { display: flex; gap: 6px; align-items: center; color: var(--muted); }
+.row input[type=checkbox] { width: 20px; height: 20px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+.tile { background: var(--panel); border: 2px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.tile .num { font-size: 2.2rem; font-weight: 700; color: var(--accent); }
+.tile ul { margin: 6px 0 0; padding-left: 20px; }
+#status { min-height: 1.6em; color: var(--accent); }

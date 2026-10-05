@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greenroom settings</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="page">
+    <nav><a href="/">Dashboard</a><a href="/setup.html">New session</a></nav>
+    <h1>Settings</h1>
+    <p id="status" role="status"></p>
+
+    <h2>Language model</h2>
+    <p><button id="test" type="button">Test LLM</button> <span id="test-result" class="hint"></span></p>
+
+    <h2>Personas</h2>
+    <div id="personas"></div>
+
+    <h2>Reminders</h2>
+    <p class="hint">An interval of 0 means the reminder fires only when a viewer joins.</p>
+    <div id="reminders"></div>
+  </main>
+  <script type="module">
+    const FIELDS = {
+      personas: [
+        ['name', 'text'], ['color', 'color'], ['style', 'text'], ['interests', 'text'],
+        ['verbosity', 'select', ['low', 'medium', 'high']], ['skeptical', 'checkbox'], ['active', 'checkbox'],
+      ],
+      reminders: [['label', 'text'], ['text', 'text'], ['interval_min', 'number'], ['enabled', 'checkbox']],
+    };
+    const BLANK = {
+      personas: { name: '', color: '#4cc9f0', style: '', interests: '', verbosity: 'medium', skeptical: 0, active: 1 },
+      reminders: { label: '', text: '', interval_min: 30, enabled: 1 },
+    };
+    const status = document.getElementById('status');
+    const say = (text) => { status.textContent = text; };
+
+    async function call(path, method = 'GET', body) {
+      const res = await fetch(`/api${path}`, {
+        method,
+        headers: body ? { 'content-type': 'application/json' } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
+      return data;
+    }
+
+    function field([name, type, options], item) {
+      if (type === 'select') {
+        const sel = document.createElement('select');
+        sel.name = name;
+        options.forEach((o) => sel.append(Object.assign(document.createElement('option'), { value: o, textContent: o })));
+        sel.value = item[name];
+        return sel;
+      }
+      const input = Object.assign(document.createElement('input'), { type, name, title: name, placeholder: name });
+      if (type === 'checkbox') {
+        input.checked = !!item[name];
+        const label = document.createElement('label');
+        label.append(input, name);
+        return label;
+      }
+      input.value = item[name];
+      if (type === 'text') input.required = name !== 'interests';
+      return input;
+    }
+
+    function read(row, kind) {
+      const out = {};
+      for (const [name, type] of FIELDS[kind]) {
+        const el = row.querySelector(`[name="${name}"]`);
+        out[name] = type === 'checkbox' ? el.checked : type === 'number' ? Number(el.value) : el.value;
+      }
+      return out;
+    }
+
+    function build(kind, item, isNew) {
+      const row = document.createElement('form');
+      row.className = 'row';
+      FIELDS[kind].forEach((f) => row.append(field(f, item)));
+      const save = Object.assign(document.createElement('button'), { type: 'submit', textContent: isNew ? 'Add' : 'Save' });
+      row.append(save);
+      row.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          await (isNew ? call(`/${kind}`, 'POST', read(row, kind)) : call(`/${kind}/${item.id}`, 'PUT', read(row, kind)));
+          say('Saved.');
+          load(kind);
+        } catch (err) { say(err.message); }
+      });
+      if (!isNew) {
+        const del = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Delete' });
+        del.addEventListener('click', async () => {
+          if (!confirm('Delete this entry?')) return;
+          try { await call(`/${kind}/${item.id}`, 'DELETE'); say('Deleted.'); load(kind); } catch (err) { say(err.message); }
+        });
+        row.append(del);
+      }
+      return row;
+    }
+
+    async function load(kind) {
+      const items = await call(`/${kind}`);
+      document.getElementById(kind).replaceChildren(...items.map((i) => build(kind, i, false)), build(kind, BLANK[kind], true));
+    }
+
+    document.getElementById('test').addEventListener('click', async () => {
+      const out = document.getElementById('test-result');
+      out.textContent = 'Testing...';
+      try {
+        const r = await call('/llm/test', 'POST');
+        out.textContent = r.ok ? `Works. ${r.count} messages in ${r.ms} ms. Sample: ${r.sample ?? 'none'}` : `Failed: ${r.error}`;
+      } catch (err) { out.textContent = `Failed: ${err.message}`; }
+    });
+
+    load('personas');
+    load('reminders');
+  </script>
+</body>
+</html>
