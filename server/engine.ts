@@ -72,6 +72,7 @@ type State = {
 export class Engine {
   private states = new Map<number, State>();
   private timer: NodeJS.Timeout | null = null;
+  onJoin: ((sessionId: number, name: string) => void) | null = null;
 
   constructor(
     private db: DB,
@@ -153,6 +154,7 @@ export class Engine {
       if (who) {
         this.push(s, { persona_id: who.id, kind: 'join', text: `${who.name} just showed up` }, now);
         s.nextJoinAt = now + nextJoinDelay(this.rand);
+        this.onJoin?.(s.id, who.name);
         return;
       }
     }
