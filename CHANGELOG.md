@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/snachodog/greenroom/compare/v1.4.0...v1.5.0) (2026-10-05)
+
+
+### Features
+
+* **llm:** prompt for twitch-style chat ([856f0fa](https://github.com/snachodog/greenroom/commit/856f0fa3f1a7d41213d6bc0c6e5da47df108bb06))
+* **setup:** choose the category from a bundled twitch category list ([70aca41](https://github.com/snachodog/greenroom/commit/70aca411d495940bd15e7b12f26af41a251b9b86))
+
 # [1.4.0](https://github.com/snachodog/greenroom/compare/v1.3.0...v1.4.0) (2026-10-05)
 
 
