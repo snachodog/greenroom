@@ -1,0 +1,35 @@
+{
+  "name": "greenroom",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Simulated practice chat for streamers",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "tsx server/index.ts",
+    "dev": "tsx watch server/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "release": "semantic-release"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.5",
+    "@fastify/websocket": "^11.3.3",
+    "better-sqlite3": "^12.11.1",
+    "fastify": "^5.12.5",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.4",
+    "@types/ws": "^8.18.2",
+    "semantic-release": "^24.2.9",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
