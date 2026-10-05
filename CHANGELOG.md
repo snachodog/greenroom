@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/snachodog/greenroom/compare/v1.1.0...v1.1.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **docker:** pin base image to node 22 ([fe4146b](https://github.com/snachodog/greenroom/commit/fe4146b83b098a648d62b2586feb935dbe8d2cae))
+
 # [1.1.0](https://github.com/snachodog/greenroom/compare/v1.0.0...v1.1.0) (2026-10-05)
 
 
