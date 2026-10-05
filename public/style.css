@@ -54,3 +54,5 @@ a { color: var(--accent); }
   .row.head { display: none; }
   .cb-text { display: inline; }
 }
+.row.personas { padding-left: 8px; padding-right: 8px; border-radius: 6px; }
+.row.personas:not(.head):nth-child(odd) { background: color-mix(in srgb, var(--fg) 9%, transparent); }
