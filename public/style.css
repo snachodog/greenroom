@@ -26,7 +26,7 @@ a { color: var(--accent); }
 #banners:not(:empty) { padding-top: 12px; }
 .banner { display: flex; gap: 12px; align-items: center; padding: 10px 14px; background: #3a2f00; border: 2px solid var(--accent); border-radius: 8px; }
 .banner .what { flex: 1; }
-.page { max-width: 1000px; margin: 0 auto; padding: 20px; }
+.page { max-width: 1280px; margin: 0 auto; padding: 20px; }
 .page nav { display: flex; gap: 16px; margin-bottom: 8px; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .row input[type=text], .row input[type=number] { flex: 1 1 160px; min-width: 0; }
@@ -39,3 +39,18 @@ a { color: var(--accent); }
 .tile .num { font-size: 2.2rem; font-weight: 700; color: var(--accent); }
 .tile ul { margin: 6px 0 0; padding-left: 20px; }
 #status { min-height: 1.6em; color: var(--accent); }
+.row.grid { display: grid; gap: 8px; align-items: center; }
+.row.personas { grid-template-columns: minmax(150px, 1.2fr) 56px minmax(140px, 2fr) minmax(140px, 2fr) 124px 90px 70px 180px; }
+.row.reminders { grid-template-columns: minmax(160px, 1fr) minmax(200px, 3fr) 120px 90px 180px; }
+.row.grid input[type=text], .row.grid input[type=number], .row.grid select { width: 100%; min-width: 0; flex: none; }
+.row.grid label { justify-content: center; }
+.row.head { padding: 6px 0; border-bottom: 2px solid var(--line); color: var(--muted); font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.row.head.personas span:nth-child(2) { text-align: center; }
+.actions { display: flex; gap: 8px; }
+.cb-text { display: none; }
+@media (max-width: 960px) {
+  .row.grid { display: flex; flex-wrap: wrap; }
+  .row.grid label { justify-content: flex-start; }
+  .row.head { display: none; }
+  .cb-text { display: inline; }
+}
