@@ -43,9 +43,9 @@ async function init() {
       el = document.createElement('div');
       el.addEventListener('click', () => ack(msg.id));
       rendered.set(msg.id, el);
-      const stick = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 80;
-      chat.append(el);
-      if (stick) chat.scrollTop = chat.scrollHeight;
+      const before = chat.scrollHeight;
+      chat.prepend(el);
+      if (chat.scrollTop > 0) chat.scrollTop += chat.scrollHeight - before;
     }
     el.className = `msg ${msg.kind}${msg.acknowledged_at ? ' acked' : ''}`;
     el.style.setProperty('--c', msg.persona_color);
@@ -96,7 +96,7 @@ async function init() {
   }
 
   (await api(`/sessions/${active.id}/messages`)).forEach(render);
-  chat.scrollTop = chat.scrollHeight;
+  chat.scrollTop = 0;
   (await api(`/sessions/${active.id}/reminders`)).forEach(reminder);
   applyStatus(session);
   connect(active.id, ({ type, data }) => {
