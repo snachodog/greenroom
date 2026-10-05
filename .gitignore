@@ -6,3 +6,4 @@ data/
 *.sqlite-*
 coverage/
 CLAUDE.local.md
+CLAUDE.md
